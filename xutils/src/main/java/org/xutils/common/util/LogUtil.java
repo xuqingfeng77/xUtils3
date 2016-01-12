@@ -30,7 +30,7 @@ import org.xutils.x;
  */
 public class LogUtil {
 
-    public static String customTagPrefix = "x_log";
+    public static String customTagPrefix = "http_log";
 
     private LogUtil() {
     }
@@ -45,6 +45,14 @@ public class LogUtil {
         return tag;
     }
 
+    /**
+     * add by xqf
+     * @return
+     */
+//    private static String generateTag() {
+//       String tag=customTagPrefix;
+//        return tag;
+//    }
     public static void d(String content) {
         if (!x.isDebug()) return;
         String tag = generateTag();

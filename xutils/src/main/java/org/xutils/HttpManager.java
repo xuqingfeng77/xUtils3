@@ -43,6 +43,18 @@ public interface HttpManager {
 
 
     /**
+     * 异步请求
+     *
+     * @param method
+     * @param entity
+     * @param callback
+     * @param <T>
+     * @param tag
+     * @return
+     */
+    <T> Callback.Cancelable request(HttpMethod method, RequestParams entity, Callback.CommonCallback<T> callback,int tag);
+
+    /**
      * 同步GET请求
      *
      * @param entity

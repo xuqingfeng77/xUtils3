@@ -65,7 +65,8 @@ public class HttpTask<ResultType> extends AbsTask<ResultType> implements Progres
 
     private static final PriorityExecutor HTTP_EXECUTOR = new PriorityExecutor(5, true);
     private static final PriorityExecutor CACHE_EXECUTOR = new PriorityExecutor(5, true);
-
+   //tag;网络请求标示用
+    private int tag=-1;
 
     public HttpTask(RequestParams params, Callback.Cancelable cancelHandler,
                     Callback.CommonCallback<ResultType> callback) {
@@ -77,6 +78,7 @@ public class HttpTask<ResultType> extends AbsTask<ResultType> implements Progres
         // set params & callback
         this.params = params;
         this.callback = callback;
+        this.tag=params.getTag();
         if (callback instanceof Callback.CacheCallback) {
             this.cacheCallback = (Callback.CacheCallback<ResultType>) callback;
         }
@@ -275,7 +277,7 @@ public class HttpTask<ResultType> extends AbsTask<ResultType> implements Progres
                 try {
                     clearRawResult();
                     // 开始请求工作
-                    LogUtil.d("load: " + this.request.getRequestUri());
+                    LogUtil.d("tag="+tag+"\nload:" + this.request.getRequestUri());
                     requestWorker = new RequestWorker();
                     if (params.isCancelFast()) {
                         requestWorker.start();
@@ -364,10 +366,10 @@ public class HttpTask<ResultType> extends AbsTask<ResultType> implements Progres
                         if (tracker != null) {
                             tracker.onCache(request, result);
                         }
-                        trustCache = this.cacheCallback.onCache(result);
+                        trustCache = this.cacheCallback.onCache(result,tag);
                     } catch (Throwable ex) {
                         trustCache = false;
-                        callback.onError(ex, true);
+                        callback.onError(ex, true,tag);
                     } finally {
                         cacheLock.notifyAll();
                     }
@@ -382,7 +384,7 @@ public class HttpTask<ResultType> extends AbsTask<ResultType> implements Progres
                                 ((Number) args[1]).longValue(),
                                 (Boolean) args[2]);
                     } catch (Throwable ex) {
-                        callback.onError(ex, true);
+                        callback.onError(ex, true,tag);
                     }
                 }
                 break;
@@ -415,33 +417,37 @@ public class HttpTask<ResultType> extends AbsTask<ResultType> implements Progres
 
     @Override
     protected void onSuccess(ResultType result) {
+        LogUtil.d("onSuccess="+result.toString());
         if (tracker != null) {
             tracker.onSuccess(request, result);
         }
         if (result != null) {
-            callback.onSuccess(result);
+            callback.onSuccess(result,tag);
         }
     }
 
     @Override
     protected void onError(Throwable ex, boolean isCallbackError) {
+        LogUtil.d("onError="+ex.getMessage());
         if (tracker != null) {
             tracker.onError(request, ex, isCallbackError);
         }
-        callback.onError(ex, isCallbackError);
+        callback.onError(ex, isCallbackError, tag);
     }
 
 
     @Override
     protected void onCancelled(Callback.CancelledException cex) {
+        LogUtil.d("onCancelled="+cex.getMessage());
         if (tracker != null) {
             tracker.onCancelled(request);
         }
-        callback.onCancelled(cex);
+        callback.onCancelled(cex,tag);
     }
 
     @Override
     protected void onFinished() {
+        LogUtil.d("onFinished");
         if (tracker != null) {
             tracker.onFinished(request);
         }
@@ -451,7 +457,7 @@ public class HttpTask<ResultType> extends AbsTask<ResultType> implements Progres
                 closeRequestSync();
             }
         });
-        callback.onFinished();
+        callback.onFinished(tag);
     }
 
     private void clearRawResult() {

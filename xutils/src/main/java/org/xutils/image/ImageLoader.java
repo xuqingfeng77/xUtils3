@@ -58,6 +58,7 @@ import java.util.concurrent.atomic.AtomicLong;
     private final static String DISK_CACHE_DIR_NAME = "xUtils_img";
     private final static Executor EXECUTOR = new PriorityExecutor(10, false);
     private final static int MEM_CACHE_MIN_SIZE = 1024 * 1024 * 4; // 4M
+    static int tag=-1;
     private final static LruCache<MemCacheKey, Drawable> MEM_CACHE =
             new LruCache<MemCacheKey, Drawable>(MEM_CACHE_MIN_SIZE) {
                 private boolean deepClear = false;
@@ -251,14 +252,14 @@ import java.util.concurrent.atomic.AtomicLong;
                 view.setImageDrawable(memDrawable);
                 trustMemCache = true;
                 if (callback instanceof CacheCallback) {
-                    trustMemCache = ((CacheCallback<Drawable>) callback).onCache(memDrawable);
+                    trustMemCache = ((CacheCallback<Drawable>) callback).onCache(memDrawable,tag);
                     if (!trustMemCache) {
                         // not trust the cache
                         // load from Network or DiskCache
                         return new ImageLoader().doLoad(view, url, localOptions, callback);
                     }
                 } else if (callback != null) {
-                    callback.onSuccess(memDrawable);
+                    callback.onSuccess(memDrawable,tag);
                 }
             } catch (Throwable ex) {
                 LogUtil.e(ex.getMessage(), ex);
@@ -268,7 +269,7 @@ import java.util.concurrent.atomic.AtomicLong;
             } finally {
                 if (trustMemCache && callback != null) {
                     try {
-                        callback.onFinished();
+                        callback.onFinished(tag);
                     } catch (Throwable ignored) {
                         LogUtil.e(ignored.getMessage(), ignored);
                     }
@@ -403,16 +404,16 @@ import java.util.concurrent.atomic.AtomicLong;
     private boolean hasCache = false;
 
     @Override
-    public boolean onCache(Drawable result) {
+    public boolean onCache(Drawable result,int tag) {
         if (!validView4Callback(true)) return false;
 
         if (result != null) {
             hasCache = true;
             setSuccessDrawable4Callback(result);
             if (cacheCallback != null) {
-                return cacheCallback.onCache(result);
+                return cacheCallback.onCache(result,tag);
             } else if (callback != null) {
-                callback.onSuccess(result);
+                callback.onSuccess(result,tag);
                 return true;
             }
             return true;
@@ -422,19 +423,19 @@ import java.util.concurrent.atomic.AtomicLong;
     }
 
     @Override
-    public void onSuccess(Drawable result) {
+    public void onSuccess(Drawable result,int tag) {
         if (!validView4Callback(!hasCache)) return;
 
         if (result != null) {
             setSuccessDrawable4Callback(result);
             if (callback != null) {
-                callback.onSuccess(result);
+                callback.onSuccess(result,tag);
             }
         }
     }
 
     @Override
-    public void onError(Throwable ex, boolean isOnCallback) {
+    public void onError(Throwable ex, boolean isOnCallback,int tag) {
         stopped = true;
         if (!validView4Callback(false)) return;
 
@@ -447,22 +448,22 @@ import java.util.concurrent.atomic.AtomicLong;
         LogUtil.e(key.url, ex);
         setErrorDrawable4Callback();
         if (callback != null) {
-            callback.onError(ex, isOnCallback);
+            callback.onError(ex, isOnCallback,tag);
         }
     }
 
     @Override
-    public void onCancelled(CancelledException cex) {
+    public void onCancelled(CancelledException cex,int tag) {
         stopped = true;
         if (!validView4Callback(false)) return;
 
         if (callback != null) {
-            callback.onCancelled(cex);
+            callback.onCancelled(cex,tag);
         }
     }
 
     @Override
-    public void onFinished() {
+    public void onFinished(int tag) {
         stopped = true;
         ImageView view = viewRef.get();
         if (view instanceof FakeImageView) {
@@ -474,7 +475,7 @@ import java.util.concurrent.atomic.AtomicLong;
         if (!validView4Callback(false)) return;
 
         if (callback != null) {
-            callback.onFinished();
+            callback.onFinished(tag);
         }
     }
 
@@ -555,12 +556,12 @@ import java.util.concurrent.atomic.AtomicLong;
                         view.setImageDrawable(options.getFailureDrawable(view));
                     }
                     if (callback != null) {
-                        callback.onError(new IllegalArgumentException(exMsg), false);
+                        callback.onError(new IllegalArgumentException(exMsg), false,tag);
                     }
                 } catch (Throwable ex) {
                     if (callback != null) {
                         try {
-                            callback.onError(ex, true);
+                            callback.onError(ex, true,tag);
                         } catch (Throwable ignored) {
                             LogUtil.e(ignored.getMessage(), ignored);
                         }
@@ -568,7 +569,7 @@ import java.util.concurrent.atomic.AtomicLong;
                 } finally {
                     if (callback != null) {
                         try {
-                            callback.onFinished();
+                            callback.onFinished(tag);
                         } catch (Throwable ignored) {
                             LogUtil.e(ignored.getMessage(), ignored);
                         }

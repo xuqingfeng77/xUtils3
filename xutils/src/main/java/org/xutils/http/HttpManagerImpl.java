@@ -1,10 +1,15 @@
 package org.xutils.http;
 
+import android.util.Log;
+
 import org.xutils.HttpManager;
 import org.xutils.common.Callback;
+import org.xutils.common.util.KeyValue;
+import org.xutils.common.util.LogUtil;
 import org.xutils.x;
 
 import java.lang.reflect.Type;
+import java.util.List;
 
 /**
  * Created by wyouflf on 15/7/23.
@@ -46,10 +51,43 @@ public final class HttpManagerImpl implements HttpManager {
         if (callback instanceof Callback.Cancelable) {
             cancelable = (Callback.Cancelable) callback;
         }
+        List<KeyValue>  mListNameVlue=entity.getQueryStringParams();
+//        if(mListNameVlue!=null)
+//        {
+//            int size=mListNameVlue.size();
+//            String strHttpLog=entity.getUri()+"?";
+//            for (int i = 0; i <size; i++) {
+//                strHttpLog+=mListNameVlue.get(i).getValueKey()+"="+mListNameVlue.get(i).getValueStr()+"&";
+//            }
+//            LogUtil.d("tag="+entity.getTag()+"\n"+strHttpLog);
+//        }
+
+
         HttpTask<T> task = new HttpTask<T>(entity, cancelable, callback);
         return x.task().start(task);
     }
+    @Override
+    public <T> Callback.Cancelable request(HttpMethod method, RequestParams entity, Callback.CommonCallback<T> callback,int tag) {
+        entity.setMethod(method);
+        Callback.Cancelable cancelable = null;
+        if (callback instanceof Callback.Cancelable) {
+            cancelable = (Callback.Cancelable) callback;
+        }
+        entity.setTag(tag);
+//        List<KeyValue>  mListNameVlue=entity.getQueryStringParams();
+//        if(mListNameVlue!=null)
+//        {
+//            int size=mListNameVlue.size();
+//            String strHttpLog=entity.getUri()+"?";
+//            for (int i = 0; i <size; i++) {
+//                strHttpLog+=mListNameVlue.get(i).getValueKey()+"="+mListNameVlue.get(i).getValueStr()+"&";
+//            }
+//            LogUtil.d("tag="+tag+"\n"+strHttpLog);
+//        }
 
+        HttpTask<T> task = new HttpTask<T>(entity, cancelable, callback);
+        return x.task().start(task);
+    }
     @Override
     public <T> T getSync(RequestParams entity, Class<T> resultType) throws Throwable {
         return requestSync(HttpMethod.GET, entity, resultType);
@@ -87,22 +125,22 @@ public final class HttpManagerImpl implements HttpManager {
         }
 
         @Override
-        public void onSuccess(T result) {
+        public void onSuccess(T result,int tag) {
 
         }
 
         @Override
-        public void onError(Throwable ex, boolean isOnCallback) {
+        public void onError(Throwable ex, boolean isOnCallback,int tag) {
 
         }
 
         @Override
-        public void onCancelled(CancelledException cex) {
+        public void onCancelled(CancelledException cex,int tag) {
 
         }
 
         @Override
-        public void onFinished() {
+        public void onFinished(int tag) {
 
         }
     }

@@ -47,7 +47,7 @@ public class RequestParams {
 
     // 注解及其扩展参数
     private HttpRequest httpRequest;
-    private final String uri;
+    private  String uri;
     private final String[] signs;
     private final String[] cacheKeys;
     private ParamsBuilder builder;
@@ -77,13 +77,15 @@ public class RequestParams {
     private int connectTimeout = 1000 * 15; // 连接超时时间
     private boolean autoResume = true; // 是否在下载是自动断点续传
     private boolean autoRename = false; // 是否根据头信息自动命名文件
-    private int maxRetryCount = 2; // 最大请求错误重试次数
+    private int maxRetryCount = 0; // 最大请求错误重试次数;交易请求的时候只能为0，其他的情况可以为多次，
+//    private int maxRetryCount = 2; // 最大请求错误重试次数
     private String saveFilePath; // 下载文件时文件保存的路径和文件名
     private boolean multipart = false; // 是否强制使用multipart表单
     private boolean cancelFast = false; // 是否可以被立即停止, true: 为请求创建新的线程, 取消时请求线程被立即中断.
     private HttpRetryHandler httpRetryHandler; // 自定义HttpRetryHandler
     private RedirectHandler redirectHandler; // 自定义重定向接口, 默认系统自动重定向.
-
+    //tag
+    private int tag=-1;//网络请求标示
     /**
      * 使用空构造创建时必须, 必须是带有@HttpRequest注解的子类.
      */
@@ -147,6 +149,10 @@ public class RequestParams {
 
     public String getUri() {
         return TextUtils.isEmpty(buildUri) ? uri : buildUri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 
     public String getCacheKey() {
@@ -829,5 +835,12 @@ public class RequestParams {
             super(key, value);
             this.setHeader = setHeader;
         }
+    }
+
+    public int getTag() {
+        return tag;
+    }
+    public void setTag(int tag) {
+        this.tag = tag;
     }
 }

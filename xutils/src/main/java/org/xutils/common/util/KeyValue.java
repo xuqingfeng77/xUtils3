@@ -27,7 +27,9 @@ public class KeyValue {
     public String getValueStr() {
         return value == null ? null : value.toString();
     }
-
+    public String getValueKey() {
+        return key == null ? null : key;
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

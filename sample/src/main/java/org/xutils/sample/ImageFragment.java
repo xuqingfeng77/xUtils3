@@ -80,23 +80,23 @@ public class ImageFragment extends BaseFragment {
     private void loadImgList(String url) {
         x.http().get(new RequestParams(url), new Callback.CommonCallback<String>() {
             @Override
-            public void onSuccess(String result) {
+            public void onSuccess(String result,int tag) {
                 imageListAdapter.addSrc(getImgSrcList(result));
                 imageListAdapter.notifyDataSetChanged();//通知listview更新数据
             }
 
             @Override
-            public void onError(Throwable ex, boolean isOnCallback) {
+            public void onError(Throwable ex, boolean isOnCallback,int tag) {
 
             }
 
             @Override
-            public void onCancelled(CancelledException cex) {
+            public void onCancelled(CancelledException cex,int tag) {
 
             }
 
             @Override
-            public void onFinished() {
+            public void onFinished(int tag) {
 
             }
         });
@@ -189,21 +189,21 @@ public class ImageFragment extends BaseFragment {
         }
 
         @Override
-        public void onSuccess(Drawable result) {
+        public void onSuccess(Drawable result,int tag) {
             this.holder.imgPb.setProgress(100);
         }
 
         @Override
-        public void onError(Throwable ex, boolean isOnCallback) {
+        public void onError(Throwable ex, boolean isOnCallback,int tag) {
         }
 
         @Override
-        public void onCancelled(CancelledException cex) {
+        public void onCancelled(CancelledException cex,int tag) {
 
         }
 
         @Override
-        public void onFinished() {
+        public void onFinished(int tag) {
 
         }
     }

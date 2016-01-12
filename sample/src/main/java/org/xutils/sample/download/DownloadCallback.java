@@ -107,7 +107,7 @@ import java.lang.ref.WeakReference;
     }
 
     @Override
-    public void onSuccess(File result) {
+    public void onSuccess(File result,int tag) {
         synchronized (DownloadCallback.class) {
             try {
                 downloadInfo.setState(DownloadState.FINISHED);
@@ -123,7 +123,7 @@ import java.lang.ref.WeakReference;
     }
 
     @Override
-    public void onError(Throwable ex, boolean isOnCallback) {
+    public void onError(Throwable ex, boolean isOnCallback,int tag) {
         synchronized (DownloadCallback.class) {
             try {
                 downloadInfo.setState(DownloadState.ERROR);
@@ -139,7 +139,7 @@ import java.lang.ref.WeakReference;
     }
 
     @Override
-    public void onCancelled(CancelledException cex) {
+    public void onCancelled(CancelledException cex,int tag) {
         synchronized (DownloadCallback.class) {
             try {
                 downloadInfo.setState(DownloadState.STOPPED);
@@ -155,7 +155,7 @@ import java.lang.ref.WeakReference;
     }
 
     @Override
-    public void onFinished() {
+    public void onFinished(int tag) {
         cancelled = false;
     }
 

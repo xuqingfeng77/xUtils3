@@ -9,13 +9,13 @@ import java.lang.reflect.Type;
 public interface Callback {
 
     public interface CommonCallback<ResultType> extends Callback {
-        void onSuccess(ResultType result);
+        void onSuccess(ResultType result,int tag);
 
-        void onError(Throwable ex, boolean isOnCallback);
+        void onError(Throwable ex, boolean isOnCallback,int tag);
 
-        void onCancelled(CancelledException cex);
+        void onCancelled(CancelledException cex,int tag);
 
-        void onFinished();
+        void onFinished(int tag);
     }
 
     public interface TypedCallback<ResultType> extends CommonCallback<ResultType> {
@@ -23,7 +23,7 @@ public interface Callback {
     }
 
     public interface CacheCallback<ResultType> extends CommonCallback<ResultType> {
-        boolean onCache(ResultType result);
+        boolean onCache(ResultType result,int tag);
     }
 
     public interface PrepareCallback<PrepareType, ResultType> extends CommonCallback<ResultType> {

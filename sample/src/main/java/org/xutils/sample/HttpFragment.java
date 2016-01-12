@@ -1,4 +1,4 @@
-package org.xutils.sample;
+package org.xutils.sample;//package org.xutils.sample;
 
 import android.content.Intent;
 import android.view.View;
@@ -23,12 +23,68 @@ import java.io.FileNotFoundException;
 import java.util.List;
 
 /**
- * Created by wyouflf on 15/11/4.
+ * Created by wyouflf on 15/11/4. update by xqf
  */
 @ContentView(R.layout.fragment_http)
 public class HttpFragment extends BaseFragment {
+    /**
+     *test add by xqf
+     *
+     * @param view
+     */
+    @Event(value = R.id.btn_test0,
+            type = View.OnClickListener.class/*可选参数, 默认是View.OnClickListener.class*/)
+    private void onTest0Click(View view) {
 
+        RequestParams  params = new RequestParams ();
+        params.setUri("https://api-core.yfbpay.cn/mer/user/merLoginMbs.do");
+        params.addQueryStringParameter("tradeId", "tradeId");
+        params.addQueryStringParameter("loginMobile", "tradeId");
+        params.addQueryStringParameter("loginPwd","tradeId");
 
+        params.setTag(20160113);
+        params.setCacheMaxAge(1000*30);//缓存时间为0
+        Callback.Cancelable cancelable
+                = x.http().get(params,
+
+                new Callback.CommonCallback<String>() {
+                    @Override
+                    public void onSuccess(String result, int tag) {
+                        Toast.makeText(x.app(), result.toString(), Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onError(Throwable ex, boolean isOnCallback, int tag) {
+                        Toast.makeText(x.app(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                        if (ex instanceof HttpException) { // 网络错误
+                            HttpException httpEx = (HttpException) ex;
+                            int responseCode = httpEx.getCode();
+                            String responseMsg = httpEx.getMessage();
+                            String errorResult = httpEx.getResult();
+                            // ...
+                        } else { // 其他错误
+                            // ...
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(CancelledException cex, int tag) {
+                        Toast.makeText(x.app(), "cancelled", Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onFinished(int tag) {
+
+                    }
+
+                });
+
+        // cancelable.cancel(); // 取消
+        // 如果需要记录请求的日志, 可使用RequestTracker接口(优先级依次降低, 找到一个实现后会忽略后面的):
+        // 1. 自定义Callback同时实现RequestTracker接口;
+        // 2. 自定义ResponseParser同时实现RequestTracker接口;
+        // 3. 在LoaderFactory注册.
+    }
     /**
      * 1. 方法必须私有限定,
      * 2. 方法以Click或Event结尾, 方便配置混淆编译参数 :
@@ -57,6 +113,7 @@ public class HttpFragment extends BaseFragment {
          * 示例: 查看 org.xutils.sample.http 包里的代码
          */
         BaiduParams params = new BaiduParams();
+        params.setUri("https://www.baidu.com");
         params.wd = "xUtils";
         // 有上传文件时使用multipart表单, 否则上传原始文件流.
         // params.setMultipart(true);
@@ -64,6 +121,8 @@ public class HttpFragment extends BaseFragment {
         // params.uploadFile = new File("/sdcard/test.txt");
         // 上传文件方式 2
         // params.addBodyParameter("uploadFile", new File("/sdcard/test.txt"));
+        params.setTag(20160112);
+        params.setCacheMaxAge(0);//缓存时间为0
         Callback.Cancelable cancelable
                 = x.http().get(params,
                 /**
@@ -105,12 +164,12 @@ public class HttpFragment extends BaseFragment {
                  **/
                 new Callback.CommonCallback<List<BaiduResponse>>() {
                     @Override
-                    public void onSuccess(List<BaiduResponse> result) {
+                    public void onSuccess(List<BaiduResponse> result, int tag) {
                         Toast.makeText(x.app(), result.get(0).toString(), Toast.LENGTH_LONG).show();
                     }
 
                     @Override
-                    public void onError(Throwable ex, boolean isOnCallback) {
+                    public void onError(Throwable ex, boolean isOnCallback, int tag) {
                         Toast.makeText(x.app(), ex.getMessage(), Toast.LENGTH_LONG).show();
                         if (ex instanceof HttpException) { // 网络错误
                             HttpException httpEx = (HttpException) ex;
@@ -124,14 +183,15 @@ public class HttpFragment extends BaseFragment {
                     }
 
                     @Override
-                    public void onCancelled(CancelledException cex) {
+                    public void onCancelled(CancelledException cex, int tag) {
                         Toast.makeText(x.app(), "cancelled", Toast.LENGTH_LONG).show();
                     }
 
                     @Override
-                    public void onFinished() {
+                    public void onFinished(int tag) {
 
                     }
+
                 });
 
         // cancelable.cancel(); // 取消
@@ -164,22 +224,22 @@ public class HttpFragment extends BaseFragment {
                 "你+& \" 好.jpg"); // InputStream参数获取不到文件名, 最好设置, 除非服务端不关心这个参数.
         x.http().post(params, new Callback.CommonCallback<String>() {
             @Override
-            public void onSuccess(String result) {
+            public void onSuccess(String result, int tag) {
                 Toast.makeText(x.app(), result, Toast.LENGTH_LONG).show();
             }
 
             @Override
-            public void onError(Throwable ex, boolean isOnCallback) {
+            public void onError(Throwable ex, boolean isOnCallback, int tag) {
                 Toast.makeText(x.app(), ex.getMessage(), Toast.LENGTH_LONG).show();
             }
 
             @Override
-            public void onCancelled(CancelledException cex) {
+            public void onCancelled(CancelledException cex, int tag) {
                 Toast.makeText(x.app(), "cancelled", Toast.LENGTH_LONG).show();
             }
 
             @Override
-            public void onFinished() {
+            public void onFinished(int tag) {
 
             }
         });
@@ -219,11 +279,43 @@ public class HttpFragment extends BaseFragment {
                 // 使用CacheCallback, xUtils将为该请求缓存数据.
                 = x.http().get(params, new Callback.CacheCallback<String>() {
 
-            private boolean hasError = false;
-            private String result = null;
+            @Override
+            public void onSuccess(String result, int tag) {
+                // 注意: 如果服务返回304或 onCache 选择了信任缓存, 这里将不会被调用,
+                // 但是 onFinished 总会被调用.
+                this.result = result;
+            }
 
             @Override
-            public boolean onCache(String result) {
+            public void onError(Throwable ex, boolean isOnCallback, int tag) {
+                hasError = true;
+                Toast.makeText(x.app(), ex.getMessage(), Toast.LENGTH_LONG).show();
+                if (ex instanceof HttpException) { // 网络错误
+                    HttpException httpEx = (HttpException) ex;
+                    int responseCode = httpEx.getCode();
+                    String responseMsg = httpEx.getMessage();
+                    String errorResult = httpEx.getResult();
+                    // ...
+                } else { // 其他错误
+                    // ...
+                }
+            }
+
+            @Override
+            public void onCancelled(CancelledException cex, int tag) {
+                Toast.makeText(x.app(), "cancelled", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFinished(int tag) {
+                if (!hasError && result != null) {
+                    // 成功获取数据
+                    Toast.makeText(x.app(), result, Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public boolean onCache(String result, int tag) {
                 // 得到缓存数据, 缓存过期后不会进入这个方法.
                 // 如果服务端没有返回过期时间, 参考params.setCacheMaxAge(maxAge)方法.
                 //
@@ -239,40 +331,10 @@ public class HttpFragment extends BaseFragment {
                 return false; // true: 信任缓存数据, 不在发起网络请求; false不信任缓存数据.
             }
 
-            @Override
-            public void onSuccess(String result) {
-                // 注意: 如果服务返回304或 onCache 选择了信任缓存, 这里将不会被调用,
-                // 但是 onFinished 总会被调用.
-                this.result = result;
-            }
+            private boolean hasError = false;
+            private String result = null;
 
-            @Override
-            public void onError(Throwable ex, boolean isOnCallback) {
-                hasError = true;
-                Toast.makeText(x.app(), ex.getMessage(), Toast.LENGTH_LONG).show();
-                if (ex instanceof HttpException) { // 网络错误
-                    HttpException httpEx = (HttpException) ex;
-                    int responseCode = httpEx.getCode();
-                    String responseMsg = httpEx.getMessage();
-                    String errorResult = httpEx.getResult();
-                    // ...
-                } else { // 其他错误
-                    // ...
-                }
-            }
 
-            @Override
-            public void onCancelled(CancelledException cex) {
-                Toast.makeText(x.app(), "cancelled", Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onFinished() {
-                if (!hasError && result != null) {
-                    // 成功获取数据
-                    Toast.makeText(x.app(), result, Toast.LENGTH_LONG).show();
-                }
-            }
         });
     }
 
