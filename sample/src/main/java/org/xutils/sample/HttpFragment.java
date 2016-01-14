@@ -8,6 +8,7 @@ import android.widget.Toast;
 import org.xutils.common.Callback;
 import org.xutils.ex.DbException;
 import org.xutils.ex.HttpException;
+import org.xutils.http.HttpMethod;
 import org.xutils.http.RequestParams;
 import org.xutils.sample.download.DownloadManager;
 import org.xutils.sample.http.BaiduParams;
@@ -40,12 +41,13 @@ public class HttpFragment extends BaseFragment {
         params.setUri("https://api-core.yfbpay.cn/mer/user/merLoginMbs.do");
         params.addQueryStringParameter("tradeId", "tradeId");
         params.addQueryStringParameter("loginMobile", "tradeId");
-        params.addQueryStringParameter("loginPwd","tradeId");
+        params.addQueryStringParameter("loginPwd", "tradeId");
 
         params.setTag(20160113);
+        int taskid=2222;
         params.setCacheMaxAge(1000*30);//缓存时间为0
         Callback.Cancelable cancelable
-                = x.http().get(params,
+                = x.http().request(HttpMethod.GET,params,
 
                 new Callback.CommonCallback<String>() {
                     @Override
@@ -77,7 +79,7 @@ public class HttpFragment extends BaseFragment {
 
                     }
 
-                });
+                },taskid);
 
         // cancelable.cancel(); // 取消
         // 如果需要记录请求的日志, 可使用RequestTracker接口(优先级依次降低, 找到一个实现后会忽略后面的):
